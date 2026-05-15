@@ -1,0 +1,16 @@
+from datetime import datetime
+from pydantic import BaseModel
+
+
+class ItemOut(BaseModel):
+    id: int
+    seller_id: int
+    title: str
+    description: str | None = None
+    category: str
+    condition: str
+    image_urls: list[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
