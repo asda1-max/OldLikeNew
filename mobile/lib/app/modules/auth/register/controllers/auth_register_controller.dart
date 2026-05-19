@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:old_like_new/app/routes/app_pages.dart';
 
 import '../services/auth_register_service.dart';
 
@@ -55,9 +56,14 @@ class AuthRegisterController extends GetxController {
       await service.register(payload);
       Get.snackbar('Success', 'Registration successful');
     } catch (e) {
+      print("error $e");
       Get.snackbar('Registration failed', e.toString());
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void goToLogin() {
+    Get.toNamed(Routes.AUTH_LOGIN);
   }
 }

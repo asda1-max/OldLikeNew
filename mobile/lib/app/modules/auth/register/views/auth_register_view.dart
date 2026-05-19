@@ -62,6 +62,11 @@ class AuthRegisterView extends GetView<AuthRegisterController> {
                       : const Text('Register'),
                 );
               }),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: controller.goToLogin,
+                child: const Text('Already have an account? Login here'),
+              ),
             ],
           ),
         ),

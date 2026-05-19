@@ -20,6 +20,7 @@ class AuthRegisterService {
     } else {
       // Try to extract detail if backend sends JSON
       String message = 'Registration failed';
+      print("Error: ${response.statusCode}: ${response.body}");
       try {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data.containsKey('detail')) {
