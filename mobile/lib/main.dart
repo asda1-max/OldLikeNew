@@ -9,6 +9,7 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   runApp(
     GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: "Application",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
