@@ -18,7 +18,12 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     items = relationship("Item", back_populates="seller", cascade="all, delete-orphan")
-    auctions = relationship("Auction", back_populates="seller", cascade="all, delete-orphan")
+    auctions = relationship(
+        "Auction",
+        back_populates="seller",
+        foreign_keys="Auction.seller_id",
+        cascade="all, delete-orphan",
+    )
     bids = relationship("Bid", back_populates="bidder", cascade="all, delete-orphan")
 
     buyer_transactions = relationship(
