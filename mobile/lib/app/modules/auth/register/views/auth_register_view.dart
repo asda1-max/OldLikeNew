@@ -288,16 +288,6 @@ class AuthRegisterView extends GetView<AuthRegisterController> {
                       ],
                     ),
                   ),
-                  DropdownMenuItem(
-                    value: 'admin',
-                    child: Row(
-                      children: [
-                        Icon(Icons.admin_panel_settings_outlined, size: 20, color: Color(0xFFB8865A)),
-                        SizedBox(width: 10),
-                        Text('Admin', style: TextStyle(fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),

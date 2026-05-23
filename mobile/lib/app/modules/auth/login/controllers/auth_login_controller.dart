@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../services/auth_login_service.dart';
 import '../../../../routes/app_pages.dart';
+import '../../../../shared/services/auth_service.dart';
 
 class AuthLoginController extends GetxController {
   final AuthLoginService service;
@@ -35,7 +36,14 @@ class AuthLoginController extends GetxController {
       final response = await service.login(email, password);
       final token = response['access_token'];
 
-      Get.snackbar('Success', 'Login successful');
+      // Fetch user profile to get the role
+      final authService = Get.find<AuthService>();
+      final profile = await service.getUserProfile(token);
+      final role = profile['role'] ?? 'buyer';
+
+      authService.setSession(token, role);
+
+      Get.snackbar('Success', 'Login successful as $role');
 
       // Navigate to Home view after successful login
       Get.offAllNamed(Routes.HOME);

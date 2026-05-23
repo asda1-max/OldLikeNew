@@ -7,6 +7,11 @@ abstract class Routes {
   static const AUTHREGISTER = _Paths.AUTHREGISTER;
   static final AUTH_REGISTER = _Paths.AUTH + _Paths.AUTH_REGISTER;
   static final AUTH_LOGIN = _Paths.AUTH + _Paths.AUTH_LOGIN;
+  static const AUCTIONS = _Paths.AUCTIONS;
+  static const SELL = _Paths.SELL;
+  static const PROFILE = _Paths.PROFILE;
+  static const TRANSACTIONS = _Paths.TRANSACTIONS;
+  static const AUCTION_DETAIL = _Paths.AUCTION_DETAIL;
 }
 
 abstract class _Paths {
@@ -16,4 +21,9 @@ abstract class _Paths {
   static const AUTHREGISTER = '/authregister';
   static const AUTH_REGISTER = '/register';
   static const AUTH_LOGIN = '/login';
+  static const AUCTIONS = '/auctions';
+  static const SELL = '/sell';
+  static const PROFILE = '/profile';
+  static const TRANSACTIONS = '/transactions';
+  static const AUCTION_DETAIL = '/auction-detail';
 }

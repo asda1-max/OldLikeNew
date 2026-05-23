@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
+import '../../../routes/app_pages.dart';
+import '../../../shared/widgets/custom_bottom_navbar.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -10,35 +12,40 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F5F0),
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            _buildAppBar(),
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildSearchBar(),
-                  const SizedBox(height: 20),
-                  _buildCategories(),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Lelang Aktif', 'Lihat Semua'),
-                  const SizedBox(height: 12),
-                  _buildActiveAuctions(),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Berakhir Segera', ''),
-                  const SizedBox(height: 12),
-                  _buildEndingSoon(),
-                  const SizedBox(height: 24),
-                  _buildFeaturedItems(),
-                  const SizedBox(height: 100),
-                ],
+        child: RefreshIndicator(
+          onRefresh: controller.fetchAuctions,
+          color: const Color(0xFFB8865A),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              _buildAppBar(),
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildSearchBar(),
+                    const SizedBox(height: 20),
+                    _buildCategories(),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Lelang Aktif', 'Lihat Semua'),
+                    const SizedBox(height: 12),
+                    _buildActiveAuctions(),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Berakhir Segera', ''),
+                    const SizedBox(height: 12),
+                    _buildEndingSoon(),
+                    const SizedBox(height: 24),
+                    _buildFeaturedItems(),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -237,24 +244,63 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildActiveAuctions() {
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return _buildAuctionCard(
-            title: 'Kamera Vintage Canon AE-1',
-            currentBid: 'Rp 1.250.000',
-            bids: 12,
-            timeLeft: '2j 15m',
-            image: 'https://picsum.photos/seed/camera${index}/300/200',
-            condition: 'Bekas - Baik',
-          );
-        },
-      ),
-    );
+    return Obx(() {
+      if (controller.isLoading.value && controller.activeAuctions.isEmpty) {
+        return const SizedBox(
+          height: 240,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB8865A)),
+            ),
+          ),
+        );
+      }
+
+      if (controller.activeAuctions.isEmpty) {
+        return const SizedBox(
+          height: 120,
+          child: Center(
+            child: Text(
+              'Tidak ada lelang aktif saat ini',
+              style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 240,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: controller.activeAuctions.length,
+          itemBuilder: (context, index) {
+            final auction = controller.activeAuctions[index];
+            final item = auction['item'] ?? {};
+            final title = item['title'] ?? 'Barang Lelang';
+            final currentPrice = (auction['current_price'] as num).toDouble();
+            final condition = item['condition'] ?? 'Bekas';
+            final endTime = auction['end_time'] ?? '';
+            final imageList = item['image_urls'] as List<dynamic>? ?? [];
+            final image = imageList.isNotEmpty
+                ? '${controller.baseUrl}/${imageList[0]}'
+                : '';
+
+            return GestureDetector(
+              onTap: () => Get.toNamed(Routes.AUCTION_DETAIL, arguments: auction['id']),
+              child: _buildAuctionCard(
+                title: title,
+                currentBid: formatPrice(currentPrice),
+                bids: 0,
+                timeLeft: getTimeLeft(endTime),
+                image: image,
+                condition: condition,
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildAuctionCard({
@@ -295,6 +341,7 @@ class HomeView extends GetView<HomeController> {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     height: 110,
+                    width: double.infinity,
                     color: const Color(0xFFE8DDD3),
                     child: const Icon(
                       Icons.image,
@@ -409,39 +456,63 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildEndingSoon() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          _buildHorizontalCard(
-            title: 'Laptop ThinkPad X230',
-            currentBid: 'Rp 2.100.000',
-            bids: 8,
-            timeLeft: '45m',
-            image: 'https://picsum.photos/seed/laptop/100/100',
-            condition: 'Bekas - Cukup',
+    return Obx(() {
+      if (controller.isLoading.value && controller.endingSoonAuctions.isEmpty) {
+        return const SizedBox(
+          height: 100,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB8865A)),
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildHorizontalCard(
-            title: 'Sepeda Lipat Dahon',
-            currentBid: 'Rp 3.500.000',
-            bids: 15,
-            timeLeft: '1j 30m',
-            image: 'https://picsum.photos/seed/bike/100/100',
-            condition: 'Bekas - Baik',
+        );
+      }
+
+      if (controller.endingSoonAuctions.isEmpty) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              'Tidak ada lelang berakhir segera',
+              style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildHorizontalCard(
-            title: 'Gitar Akustik Yamaha',
-            currentBid: 'Rp 850.000',
-            bids: 6,
-            timeLeft: '3j 20m',
-            image: 'https://picsum.photos/seed/guitar/100/100',
-            condition: 'Bekas - Baik',
-          ),
-        ],
-      ),
-    );
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          children: List.generate(controller.endingSoonAuctions.length, (index) {
+            final auction = controller.endingSoonAuctions[index];
+            final item = auction['item'] ?? {};
+            final title = item['title'] ?? 'Barang Lelang';
+            final currentPrice = (auction['current_price'] as num).toDouble();
+            final condition = item['condition'] ?? 'Bekas';
+            final endTime = auction['end_time'] ?? '';
+            final imageList = item['image_urls'] as List<dynamic>? ?? [];
+            final image = imageList.isNotEmpty
+                ? '${controller.baseUrl}/${imageList[0]}'
+                : '';
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: GestureDetector(
+                onTap: () => Get.toNamed(Routes.AUCTION_DETAIL, arguments: auction['id']),
+                child: _buildHorizontalCard(
+                  title: title,
+                  currentBid: formatPrice(currentPrice),
+                  bids: 0,
+                  timeLeft: getTimeLeft(endTime),
+                  image: image,
+                  condition: condition,
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    });
   }
 
   Widget _buildHorizontalCard({
@@ -722,55 +793,20 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home_rounded, 'Home', true),
-              _buildNavItem(Icons.gavel_outlined, 'Lelang', false),
-              _buildNavItem(Icons.add_circle_outline, 'Jual', false),
-              _buildNavItem(Icons.favorite_border, 'Favorit', false),
-              _buildNavItem(Icons.person_outline, 'Profil', false),
-            ],
-          ),
-        ),
-      ),
-    );
+  String formatPrice(double price) {
+    return 'Rp ${price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 24,
-          color: isActive ? const Color(0xFFB8865A) : Colors.grey,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            color: isActive ? const Color(0xFFB8865A) : Colors.grey,
-          ),
-        ),
-      ],
-    );
+  String getTimeLeft(String endTimeStr) {
+    if (endTimeStr.isEmpty) return 'Berakhir';
+    final endTime = DateTime.parse(endTimeStr).toLocal();
+    final difference = endTime.difference(DateTime.now());
+    if (difference.isNegative) {
+      return 'Berakhir';
+    }
+    if (difference.inHours > 0) {
+      return '${difference.inHours}j ${difference.inMinutes.remainder(60)}m';
+    }
+    return '${difference.inMinutes}m';
   }
 }

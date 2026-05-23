@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class HomeController extends GetxController {
+class AuctionsController extends GetxController {
   final isLoading = false.obs;
-  final activeAuctions = <dynamic>[].obs;
-  final endingSoonAuctions = <dynamic>[].obs;
+  final auctions = <dynamic>[].obs;
+  final selectedFilterIndex = 0.obs; // 0 = Semua/Aktif, 1 = Selesai/Closed
 
   late final String baseUrl;
 
@@ -20,22 +20,30 @@ class HomeController extends GetxController {
   Future<void> fetchAuctions() async {
     isLoading.value = true;
     try {
-      final url = Uri.parse('$baseUrl/auctions/');
+      String statusParam = 'active';
+      if (selectedFilterIndex.value == 3) {
+        // "Selesai" chip
+        statusParam = 'closed';
+      }
+
+      final url = Uri.parse('$baseUrl/auctions/?status=$statusParam');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        activeAuctions.value = data;
-        
-        // Sorting or filtering for ending soon (take first 3)
-        endingSoonAuctions.value = data.take(3).toList();
+        auctions.value = data;
       } else {
-        throw Exception('Gagal memuat lelang');
+        throw Exception('Gagal memuat daftar lelang');
       }
     } catch (e) {
-      print('Error fetching auctions on home: $e');
+      print('Error fetching auctions list: $e');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void changeFilter(int index) {
+    selectedFilterIndex.value = index;
+    fetchAuctions();
   }
 }
