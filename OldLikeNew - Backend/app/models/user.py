@@ -21,8 +21,8 @@ class User(Base):
     auctions = relationship(
         "Auction",
         back_populates="seller",
-        foreign_keys="Auction.seller_id",
         cascade="all, delete-orphan",
+        foreign_keys="Auction.seller_id",
     )
     bids = relationship("Bid", back_populates="bidder", cascade="all, delete-orphan")
 
