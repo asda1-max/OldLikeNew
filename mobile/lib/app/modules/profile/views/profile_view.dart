@@ -33,11 +33,15 @@ class ProfileView extends GetView<ProfileController> {
         }
 
         return SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildProfileHeader(),
+          child: RefreshIndicator(
+            onRefresh: () => controller.fetchUserProfile(forceRefresh: true),
+            color: const Color(0xFFB8865A),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildProfileHeader(),
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -60,6 +64,7 @@ class ProfileView extends GetView<ProfileController> {
               ],
             ),
           ),
+          )
         );
       }),
       bottomNavigationBar: Obx(() {

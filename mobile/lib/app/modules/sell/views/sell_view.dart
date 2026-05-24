@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/sell_controller.dart';
@@ -32,6 +33,8 @@ class SellView extends GetView<SellController> {
               _buildSectionTitle('Informasi Barang', Icons.shopping_bag_outlined),
               const SizedBox(height: 12),
               _buildCard([
+                _buildImagePicker(),
+                const SizedBox(height: 16),
                 _buildTextField(
                   controller: controller.titleController,
                   label: 'Nama Barang',
@@ -81,6 +84,68 @@ class SellView extends GetView<SellController> {
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Foto Barang',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF4A2C1A),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Obx(() {
+          final image = controller.imageFile.value;
+          return GestureDetector(
+            onTap: controller.pickImage,
+            child: Container(
+              height: 150,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9F5F0),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFFE8DDD3),
+                  width: 1.2,
+                ),
+              ),
+              child: image != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(11),
+                      child: Image.file(
+                        File(image.path),
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_outlined,
+                          color: Color(0xFFB8865A),
+                          size: 40,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Ambil Foto dari Kamera',
+                          style: TextStyle(
+                            color: Color(0xFFB8865A),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          );
+        }),
+      ],
     );
   }
 

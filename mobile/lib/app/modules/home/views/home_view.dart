@@ -13,7 +13,7 @@ class HomeView extends GetView<HomeController> {
       backgroundColor: const Color(0xFFF9F5F0),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: controller.fetchAuctions,
+          onRefresh: () => controller.fetchAuctions(forceRefresh: true),
           color: const Color(0xFFB8865A),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -136,11 +136,16 @@ class HomeView extends GetView<HomeController> {
           ],
         ),
         child: TextField(
-          decoration: InputDecoration(
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              Get.offNamed(Routes.AUCTIONS, arguments: {'search': value});
+            }
+          },
+          decoration: const InputDecoration(
             hintText: 'Cari barang lelang...',
-            prefixIcon: const Icon(Icons.search, color: Color(0xFFB8865A)),
+            prefixIcon: Icon(Icons.search, color: Color(0xFFB8865A)),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
+            contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
@@ -170,9 +175,13 @@ class HomeView extends GetView<HomeController> {
           final cat = categories[index];
           return Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: Column(
-              children: [
-                Container(
+            child: GestureDetector(
+              onTap: () {
+                Get.offNamed(Routes.AUCTIONS, arguments: {'category': cat['label']});
+              },
+              child: Column(
+                children: [
+                  Container(
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
@@ -206,6 +215,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ],
+            ),
             ),
           );
         },

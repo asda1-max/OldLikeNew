@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../shared/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
 
@@ -15,6 +16,9 @@ class SellController extends GetxController {
   final selectedCategory = 'Elektronik'.obs;
   final selectedCondition = 'Baru'.obs;
   final durationHours = 24.obs;
+
+  final imageFile = Rx<XFile?>(null);
+  final ImagePicker _picker = ImagePicker();
 
   final isLoading = false.obs;
 
@@ -45,6 +49,18 @@ class SellController extends GetxController {
     super.onClose();
   }
 
+  Future<void> pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        imageFile.value = image;
+      }
+    } catch (e) {
+      print("Error saat mengambil gambar : $e");
+      Get.snackbar('Error', 'Gagal mengambil gambar: $e');
+    }
+  }
+
   Future<void> submitSell() async {
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
@@ -53,6 +69,11 @@ class SellController extends GetxController {
 
     if (title.isEmpty || startPriceStr.isEmpty) {
       Get.snackbar('Error', 'Nama barang dan Harga awal harus diisi');
+      return;
+    }
+
+    if (imageFile.value == null) {
+      Get.snackbar('Error', 'Foto barang harus diisi');
       return;
     }
 
@@ -90,6 +111,11 @@ class SellController extends GetxController {
       itemRequest.fields['description'] = description;
       itemRequest.fields['category'] = selectedCategory.value;
       itemRequest.fields['condition'] = selectedCondition.value;
+
+      itemRequest.files.add(await http.MultipartFile.fromPath(
+        'images',
+        imageFile.value!.path,
+      ));
 
       final itemStreamedResponse = await itemRequest.send();
       final itemResponse = await http.Response.fromStream(itemStreamedResponse);
@@ -143,6 +169,7 @@ class SellController extends GetxController {
       selectedCategory.value = 'Elektronik';
       selectedCondition.value = 'Baru';
       durationHours.value = 24;
+      imageFile.value = null;
 
       // Redirect to Home view or Auctions view
       Get.offAllNamed(Routes.HOME);

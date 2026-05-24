@@ -34,6 +34,8 @@ class AuctionsView extends GetView<AuctionsController> {
                 border: Border.all(color: const Color(0xFFD4A574).withOpacity(0.3)),
               ),
               child: TextField(
+                controller: controller.searchController,
+                onChanged: controller.onSearchChanged,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Cari barang lelang...',
@@ -98,7 +100,7 @@ class AuctionsView extends GetView<AuctionsController> {
               }
 
               return RefreshIndicator(
-                onRefresh: controller.fetchAuctions,
+                onRefresh: () => controller.fetchAuctions(forceRefresh: true),
                 color: const Color(0xFFB8865A),
                 child: ListView.builder(
                   padding: const EdgeInsets.all(20),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../shared/services/auth_service.dart';
@@ -21,7 +22,7 @@ class ProfileController extends GetxController {
     fetchUserProfile();
   }
 
-  Future<void> fetchUserProfile() async {
+  Future<void> fetchUserProfile({bool forceRefresh = false}) async {
     final authService = Get.find<AuthService>();
     final token = authService.token.value;
     
@@ -31,9 +32,25 @@ class ProfileController extends GetxController {
       return;
     }
 
-    isLoading.value = true;
-
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'profile_cache';
+      final cachedData = prefs.getString(cacheKey);
+
+      if (cachedData != null) {
+        final data = jsonDecode(cachedData) as Map<String, dynamic>;
+        name.value = data['name'] ?? 'Pengguna';
+        email.value = data['email'] ?? '';
+        role.value = data['role'] ?? 'buyer';
+        authService.role.value = role.value;
+
+        if (!forceRefresh) {
+          return;
+        }
+      } else {
+        isLoading.value = true;
+      }
+
       final url = Uri.parse('$baseUrl/auth/me');
       final response = await http.get(
         url,
@@ -51,8 +68,11 @@ class ProfileController extends GetxController {
 
         // Keep the role updated in the global authService too
         authService.role.value = role.value;
+        prefs.setString(cacheKey, response.body);
       } else {
-        throw Exception('Gagal memuat profil');
+        if (cachedData == null) {
+          throw Exception('Gagal memuat profil');
+        }
       }
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal memuat informasi profil: ${e.toString()}');

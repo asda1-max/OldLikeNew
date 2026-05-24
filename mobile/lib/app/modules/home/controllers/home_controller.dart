@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -17,20 +18,36 @@ class HomeController extends GetxController {
     fetchAuctions();
   }
 
-  Future<void> fetchAuctions() async {
-    isLoading.value = true;
+  Future<void> fetchAuctions({bool forceRefresh = false}) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'home_auctions_cache';
+      
+      final cachedData = prefs.getString(cacheKey);
+      if (cachedData != null) {
+        final List<dynamic> data = jsonDecode(cachedData);
+        activeAuctions.value = data;
+        endingSoonAuctions.value = data.take(3).toList();
+        
+        if (!forceRefresh) {
+          return; // Skip fetching from backend if we already have cache
+        }
+      } else {
+        isLoading.value = true;
+      }
+
       final url = Uri.parse('$baseUrl/auctions/');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         activeAuctions.value = data;
-        
-        // Sorting or filtering for ending soon (take first 3)
         endingSoonAuctions.value = data.take(3).toList();
+        prefs.setString(cacheKey, response.body);
       } else {
-        throw Exception('Gagal memuat lelang');
+        if (cachedData == null) {
+          throw Exception('Gagal memuat lelang');
+        }
       }
     } catch (e) {
       print('Error fetching auctions on home: $e');
