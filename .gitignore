@@ -14,3 +14,6 @@ uploads/
 
 # Python
 __pycache__/
+
+/OldLikeNew - Backend/.venv/
+
