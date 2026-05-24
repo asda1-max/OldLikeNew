@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <h2>Transactions</h2>
+          <p class="page-subtitle"><%= totalTransactions %> total transactions</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="card filter-card">
+          <form action="/transactions" method="GET" class="filter-form" id="transactionFilterForm">
+            <div class="filter-group">
+              <label for="paymentFilter">Payment Status</label>
+              <select name="payment" id="paymentFilter" class="form-control">
+                <option value="all" <%= paymentFilter === 'all' ? 'selected' : '' %>>All Payment</option>
+                <option value="pending" <%= paymentFilter === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="paid" <%= paymentFilter === 'paid' ? 'selected' : '' %>>Paid</option>
+                <option value="cancelled" <%= paymentFilter === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="shippingFilter">Shipping Status</label>
+              <select name="shipping" id="shippingFilter" class="form-control">
+                <option value="all" <%= shippingFilter === 'all' ? 'selected' : '' %>>All Shipping</option>
+                <option value="pending" <%= shippingFilter === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="shipped" <%= shippingFilter === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="delivered" <%= shippingFilter === 'delivered' ? 'selected' : '' %>>Delivered</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i data-lucide="filter"></i> Filter
+            </button>
+          </form>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="card">
+          <div class="card-body">
+            <% if (transactions.length === 0) { %>
+              <div class="empty-state">
+                <i data-lucide="credit-card"></i>
+                <p>No transactions found</p>
+              </div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="data-table" id="transactionsTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Auction</th>
+                      <th>Buyer</th>
+                      <th>Seller</th>
+                      <th>Final Price</th>
+                      <th>Payment</th>
+                      <th>Shipping</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% transactions.forEach(function(t) { %>
+                      <tr>
+                        <td><span class="id-badge">#<%= t.id %></span></td>
+                        <td><a href="/auctions/<%= t.auction_id %>" class="link">Auction #<%= t.auction_id %></a></td>
+                        <td><a href="/users/<%= t.buyer_id %>" class="link">User #<%= t.buyer_id %></a></td>
+                        <td><a href="/users/<%= t.seller_id %>" class="link">User #<%= t.seller_id %></a></td>
+                        <td class="text-currency">Rp <%= Number(t.final_price).toLocaleString('id-ID') %></td>
+                        <td>
+                          <span class="badge badge-<%= t.payment_status === 'paid' ? 'success' : t.payment_status === 'cancelled' ? 'danger' : 'warning' %>">
+                            <%= t.payment_status %>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge badge-<%= t.shipping_status === 'delivered' ? 'success' : t.shipping_status === 'shipped' ? 'info' : 'warning' %>">
+                            <%= t.shipping_status %>
+                          </span>
+                        </td>
+                        <td class="text-muted"><%= new Date(t.created_at).toLocaleDateString('id-ID') %></td>
+                        <td>
+                          <a href="/transactions/<%= t.id %>" class="btn btn-sm btn-outline" title="View Detail">
+                            <i data-lucide="eye"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <a href="/transactions" class="btn btn-sm btn-outline btn-back">
+              <i data-lucide="arrow-left"></i> Back
+            </a>
+            <h2>Transaction #<%= transaction.id %></h2>
+            <p class="page-subtitle">Transaction Detail</p>
+          </div>
+        </div>
+
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i data-lucide="alert-circle"></i>
+            <span><%= error %></span>
+          </div>
+        <% } %>
+        <% if (success) { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle"></i>
+            <span><%= success %></span>
+          </div>
+        <% } %>
+
+        <div class="detail-grid">
+          <!-- Transaction Info -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="credit-card"></i> Transaction Information</h3>
+            </div>
+            <div class="card-body">
+              <div class="detail-fields">
+                <div class="detail-field">
+                  <span class="detail-label">Transaction ID</span>
+                  <span class="detail-value"><span class="id-badge">#<%= transaction.id %></span></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Auction</span>
+                  <span class="detail-value">
+                    <a href="/auctions/<%= transaction.auction_id %>" class="link">Auction #<%= transaction.auction_id %></a>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Final Price</span>
+                  <span class="detail-value text-currency" style="font-size:1.25rem;font-weight:700;">
+                    Rp <%= Number(transaction.final_price).toLocaleString('id-ID') %>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Payment Status</span>
+                  <span class="detail-value">
+                    <span class="badge badge-lg badge-<%= transaction.payment_status === 'paid' ? 'success' : transaction.payment_status === 'cancelled' ? 'danger' : 'warning' %>">
+                      <%= transaction.payment_status.toUpperCase() %>
+                    </span>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Shipping Status</span>
+                  <span class="detail-value">
+                    <span class="badge badge-lg badge-<%= transaction.shipping_status === 'delivered' ? 'success' : transaction.shipping_status === 'shipped' ? 'info' : 'warning' %>">
+                      <%= transaction.shipping_status.toUpperCase() %>
+                    </span>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Created</span>
+                  <span class="detail-value"><%= new Date(transaction.created_at).toLocaleString('id-ID') %></span>
+                </div>
+              </div>
+
+              <!-- Buyer Info -->
+              <% if (buyer) { %>
+                <hr class="divider">
+                <h4 class="section-subtitle"><i data-lucide="shopping-cart"></i> Buyer</h4>
+                <div class="detail-fields">
+                  <div class="detail-field">
+                    <span class="detail-label">Name</span>
+                    <span class="detail-value"><a href="/users/<%= buyer.id %>" class="link"><%= buyer.name %></a></span>
+                  </div>
+                  <div class="detail-field">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value"><%= buyer.email %></span>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Seller Info -->
+              <% if (seller) { %>
+                <hr class="divider">
+                <h4 class="section-subtitle"><i data-lucide="store"></i> Seller</h4>
+                <div class="detail-fields">
+                  <div class="detail-field">
+                    <span class="detail-label">Name</span>
+                    <span class="detail-value"><a href="/users/<%= seller.id %>" class="link"><%= seller.name %></a></span>
+                  </div>
+                  <div class="detail-field">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value"><%= seller.email %></span>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Update Status -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="settings"></i> Update Status</h3>
+            </div>
+            <div class="card-body">
+              <form action="/transactions/<%= transaction.id %>/status" method="POST" class="status-form" id="updateStatusForm">
+                <div class="form-group">
+                  <label for="paymentStatus">
+                    <i data-lucide="wallet"></i>
+                    <span>Payment Status</span>
+                  </label>
+                  <select name="payment_status" id="paymentStatus" class="form-control">
+                    <option value="">— No Change —</option>
+                    <option value="pending" <%= transaction.payment_status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="paid" <%= transaction.payment_status === 'paid' ? 'selected' : '' %>>Paid</option>
+                    <option value="cancelled" <%= transaction.payment_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="shippingStatus">
+                    <i data-lucide="truck"></i>
+                    <span>Shipping Status</span>
+                  </label>
+                  <select name="shipping_status" id="shippingStatus" class="form-control">
+                    <option value="">— No Change —</option>
+                    <option value="pending" <%= transaction.shipping_status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="shipped" <%= transaction.shipping_status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="delivered" <%= transaction.shipping_status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="updateStatusBtn">
+                  <i data-lucide="save"></i> Update Status
+                </button>
+              </form>
+
+              <!-- Auction Info Preview -->
+              <% if (auction) { %>
+                <hr class="divider">
+                <h4 class="section-subtitle"><i data-lucide="timer"></i> Auction Info</h4>
+                <div class="detail-fields">
+                  <div class="detail-field">
+                    <span class="detail-label">Item</span>
+                    <span class="detail-value">
+                      <% if (auction.item) { %>
+                        <a href="/items/<%= auction.item.id %>" class="link"><%= auction.item.title %></a>
+                      <% } else { %>
+                        N/A
+                      <% } %>
+                    </span>
+                  </div>
+                  <div class="detail-field">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">
+                      <span class="badge badge-<%= auction.status === 'closed' ? 'primary' : 'default' %>"><%= auction.status %></span>
+                    </span>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <h2>Item Management</h2>
+          <p class="page-subtitle">All items listed on the platform</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="card filter-card">
+          <form action="/items" method="GET" class="filter-form" id="itemFilterForm">
+            <div class="filter-group">
+              <label for="categoryFilter">Category</label>
+              <select name="category" id="categoryFilter" class="form-control">
+                <option value="all" <%= categoryFilter === 'all' ? 'selected' : '' %>>All Categories</option>
+                <% categories.forEach(function(cat) { %>
+                  <option value="<%= cat %>" <%= categoryFilter === cat ? 'selected' : '' %>><%= cat %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="conditionFilter">Condition</label>
+              <select name="condition" id="conditionFilter" class="form-control">
+                <option value="all" <%= conditionFilter === 'all' ? 'selected' : '' %>>All</option>
+                <option value="new" <%= conditionFilter === 'new' ? 'selected' : '' %>>New</option>
+                <option value="used" <%= conditionFilter === 'used' ? 'selected' : '' %>>Used</option>
+              </select>
+            </div>
+            <div class="filter-group filter-search">
+              <label for="searchInput">Search</label>
+              <div class="search-wrapper">
+                <i data-lucide="search"></i>
+                <input type="text" name="search" id="searchInput" class="form-control" placeholder="Search items..." value="<%= search %>">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i data-lucide="filter"></i> Filter
+            </button>
+          </form>
+        </div>
+
+        <!-- Items Grid -->
+        <% if (items.length === 0) { %>
+          <div class="card">
+            <div class="card-body">
+              <div class="empty-state">
+                <i data-lucide="package"></i>
+                <p>No items found</p>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="items-grid">
+            <% items.forEach(function(item) { %>
+              <div class="item-card card">
+                <div class="item-card-image">
+                  <% if (item.image_urls && item.image_urls.length > 0) { %>
+                    <img src="<%= item.image_urls[0].startsWith('http') ? item.image_urls[0] : API_BASE_URL + '/' + item.image_urls[0] %>" alt="<%= item.title %>" loading="lazy">
+                  <% } else { %>
+                    <div class="item-card-placeholder">
+                      <i data-lucide="image"></i>
+                    </div>
+                  <% } %>
+                  <span class="item-condition-badge badge badge-<%= item.condition === 'new' ? 'success' : 'info' %>">
+                    <%= item.condition %>
+                  </span>
+                </div>
+                <div class="item-card-body">
+                  <h4 class="item-card-title"><%= item.title %></h4>
+                  <span class="badge badge-default"><%= item.category %></span>
+                  <p class="item-card-desc"><%= item.description ? item.description.substring(0, 80) + '...' : 'No description' %></p>
+                  <div class="item-card-meta">
+                    <span class="text-muted">
+                      <i data-lucide="calendar" style="width:12px;height:12px"></i>
+                      <%= new Date(item.created_at).toLocaleDateString('id-ID') %>
+                    </span>
+                    <% if (item.auctions && item.auctions.length > 0) { %>
+                      <span class="badge badge-primary"><%= item.auctions.length %> auction(s)</span>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="item-card-footer">
+                  <a href="/items/<%= item.id %>" class="btn btn-sm btn-outline btn-block">
+                    <i data-lucide="eye"></i> View Detail
+                  </a>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>
