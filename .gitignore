@@ -1,1 +1,16 @@
 /.venv
+# Environment and Credentials
+.env
+firebase-credentials.json
+*.json
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+uploads/
+
+# Python
+__pycache__/

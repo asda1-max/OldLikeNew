@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.auction import Auction
 from app.models.bid import Bid
 from app.models.transaction import Transaction
+from app.services.firebase_service import sync_auction_to_firebase
 
 MIN_INCREMENT = Decimal("1000")
 
@@ -43,6 +44,10 @@ def close_auction(db: Session, auction: Auction) -> Auction:
     db.add(auction)
     db.commit()
     db.refresh(auction)
+    
+    # Sync status penutupan ke Firebase
+    sync_auction_to_firebase(auction)
+    
     return auction
 
 

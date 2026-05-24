@@ -7,6 +7,7 @@ from app.models.item import Item
 from app.models.user import User
 from app.schemas.auction import AuctionCreate, AuctionDetail, AuctionOut, AuctionUpdate
 from app.services.auction_service import close_auction
+from app.services.firebase_service import sync_auction_to_firebase
 from app.utils.dependencies import get_current_user, get_db, require_roles
 
 router = APIRouter(prefix="/auctions", tags=["auctions"])
@@ -43,6 +44,10 @@ def create_auction(
     db.add(auction)
     db.commit()
     db.refresh(auction)
+    
+    # Sync status awal ke Firebase
+    sync_auction_to_firebase(auction)
+    
     return auction
 
 
@@ -110,6 +115,8 @@ def update_auction(
         db.add(auction)
         db.commit()
         db.refresh(auction)
+        
+    sync_auction_to_firebase(auction)
     return auction
 
 

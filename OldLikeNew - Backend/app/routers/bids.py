@@ -7,6 +7,7 @@ from app.models.bid import Bid
 from app.models.user import User
 from app.schemas.bid import BidCreate, BidOut
 from app.services.auction_service import MIN_INCREMENT, apply_buyout_if_needed
+from app.services.firebase_service import sync_auction_to_firebase
 from app.utils.dependencies import get_db, require_roles
 
 router = APIRouter(prefix="/bids", tags=["bids"])
@@ -55,6 +56,10 @@ def place_bid(
     db.refresh(bid)
 
     apply_buyout_if_needed(db, auction, amount, current_user.id)
+    
+    # Sync status terbaru ke Firebase Realtime/Firestore
+    sync_auction_to_firebase(auction)
+    
     return bid
 
 
