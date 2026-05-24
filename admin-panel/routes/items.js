@@ -6,36 +6,36 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-// GET /items — List all items (fetched via auctions since /items/ is seller-scoped)
+// GET /items — List all items
 router.get('/', async (req, res, next) => {
   try {
     const api = createApiClient(req.session.token);
 
-    // Fetch items from all auctions (active + closed + draft + cancelled)
+    // Fetch all items directly from the new admin endpoint
+    const itemsRes = await api.get('/items/all');
+    let items = itemsRes.data;
+
+    // Fetch auctions to attach
     const statuses = ['active', 'closed', 'cancelled', 'draft'];
     const results = await Promise.allSettled(
       statuses.map((s) => api.get(`/auctions/?status=${s}`))
     );
 
-    // Collect unique items from auctions
-    const itemMap = new Map();
     const auctionsByItem = new Map();
 
     results.forEach((r) => {
       if (r.status === 'fulfilled') {
         r.value.data.forEach((auction) => {
-          if (auction.item) {
-            itemMap.set(auction.item.id, auction.item);
-            if (!auctionsByItem.has(auction.item.id)) {
-              auctionsByItem.set(auction.item.id, []);
+          const itemId = auction.item ? auction.item.id : auction.item_id;
+          if (itemId) {
+            if (!auctionsByItem.has(itemId)) {
+              auctionsByItem.set(itemId, []);
             }
-            auctionsByItem.get(auction.item.id).push(auction);
+            auctionsByItem.get(itemId).push(auction);
           }
         });
       }
     });
-
-    let items = Array.from(itemMap.values());
 
     // Attach auction info
     items = items.map((item) => ({
@@ -63,7 +63,7 @@ router.get('/', async (req, res, next) => {
     }
 
     // Get unique categories for filter
-    const categories = [...new Set(Array.from(itemMap.values()).map((i) => i.category))];
+    const categories = [...new Set(items.map((i) => i.category))];
 
     res.render('items/index', {
       title: 'Item Management — LelangKu Admin',
@@ -118,6 +118,17 @@ router.get('/:id', async (req, res, next) => {
       seller,
       relatedAuctions,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /items/:id/verify — Verify item
+router.post('/:id/verify', async (req, res, next) => {
+  try {
+    const api = createApiClient(req.session.token);
+    await api.put(`/items/${req.params.id}/verify`);
+    res.redirect(`/items/${req.params.id}`);
   } catch (err) {
     next(err);
   }

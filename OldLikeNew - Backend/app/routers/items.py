@@ -52,6 +52,23 @@ def list_my_items(db: Session = Depends(get_db), current_user: User = Depends(re
     return db.query(Item).filter(Item.seller_id == current_user.id).all()
 
 
+@router.get("/all", response_model=list[ItemOut])
+def list_all_items(db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin"))):
+    return db.query(Item).order_by(Item.id.desc()).all()
+
+
+@router.put("/{item_id}/verify", response_model=ItemOut)
+def verify_item(item_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin"))):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    item.is_verified = True
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
 @router.get("/{item_id}", response_model=ItemOut)
 def get_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(Item).filter(Item.id == item_id).first()

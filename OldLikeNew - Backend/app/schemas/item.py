@@ -10,6 +10,7 @@ class ItemOut(BaseModel):
     category: str
     condition: str
     image_urls: list[str]
+    is_verified: bool = False
     created_at: datetime
 
     class Config:

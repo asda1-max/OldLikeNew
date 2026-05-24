@@ -24,6 +24,8 @@ def create_auction(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     if item.seller_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    if not item.is_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item must be verified before auctioning")
 
     start_time = payload.start_time or datetime.utcnow()
     if payload.end_time <= start_time:

@@ -77,7 +77,14 @@
                 </div>
                 <div class="item-card-body">
                   <h4 class="item-card-title"><%= item.title %></h4>
-                  <span class="badge badge-default"><%= item.category %></span>
+                  <div>
+                    <span class="badge badge-default"><%= item.category %></span>
+                    <% if (item.is_verified) { %>
+                      <span class="badge badge-success">Verified</span>
+                    <% } else { %>
+                      <span class="badge badge-warning">Pending</span>
+                    <% } %>
+                  </div>
                   <p class="item-card-desc"><%= item.description ? item.description.substring(0, 80) + '...' : 'No description' %></p>
                   <div class="item-card-meta">
                     <span class="text-muted">

@@ -19,6 +19,15 @@
             <h2><%= item.title %></h2>
             <p class="page-subtitle">Item Detail</p>
           </div>
+          <% if (!item.is_verified) { %>
+            <div>
+              <form action="/items/<%= item.id %>/verify" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="check-circle"></i> Verify Item
+                </button>
+              </form>
+            </div>
+          <% } %>
         </div>
 
         <div class="detail-grid">
@@ -69,6 +78,16 @@
                 <div class="detail-field">
                   <span class="detail-label">Category</span>
                   <span class="detail-value"><span class="badge badge-default"><%= item.category %></span></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Verification</span>
+                  <span class="detail-value">
+                    <% if (item.is_verified) { %>
+                      <span class="badge badge-success">Verified</span>
+                    <% } else { %>
+                      <span class="badge badge-warning">Pending</span>
+                    <% } %>
+                  </span>
                 </div>
                 <div class="detail-field">
                   <span class="detail-label">Condition</span>
