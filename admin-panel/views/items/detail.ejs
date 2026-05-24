@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <a href="/items" class="btn btn-sm btn-outline btn-back">
+              <i data-lucide="arrow-left"></i> Back
+            </a>
+            <h2><%= item.title %></h2>
+            <p class="page-subtitle">Item Detail</p>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <!-- Image Gallery -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="image"></i> Photos</h3>
+            </div>
+            <div class="card-body">
+              <% if (item.image_urls && item.image_urls.length > 0) { %>
+                <div class="image-gallery">
+                  <div class="gallery-main">
+                    <img src="<%= item.image_urls[0].startsWith('http') ? item.image_urls[0] : API_BASE_URL + '/' + item.image_urls[0] %>" alt="<%= item.title %>" id="galleryMainImage">
+                  </div>
+                  <% if (item.image_urls.length > 1) { %>
+                    <div class="gallery-thumbs">
+                      <% item.image_urls.forEach(function(url, idx) { %>
+                        <img
+                          src="<%= url.startsWith('http') ? url : API_BASE_URL + '/' + url %>"
+                          alt="Photo <%= idx + 1 %>"
+                          class="gallery-thumb <%= idx === 0 ? 'active' : '' %>"
+                          data-full="<%= url.startsWith('http') ? url : API_BASE_URL + '/' + url %>"
+                          onclick="document.getElementById('galleryMainImage').src=this.dataset.full; document.querySelectorAll('.gallery-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+                      <% }); %>
+                    </div>
+                  <% } %>
+                </div>
+              <% } else { %>
+                <div class="empty-state">
+                  <i data-lucide="image-off"></i>
+                  <p>No photos available</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Item Info -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="package"></i> Item Information</h3>
+            </div>
+            <div class="card-body">
+              <div class="detail-fields">
+                <div class="detail-field">
+                  <span class="detail-label">Title</span>
+                  <span class="detail-value"><%= item.title %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Category</span>
+                  <span class="detail-value"><span class="badge badge-default"><%= item.category %></span></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Condition</span>
+                  <span class="detail-value">
+                    <span class="badge badge-<%= item.condition === 'new' ? 'success' : 'info' %>"><%= item.condition %></span>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Description</span>
+                  <span class="detail-value"><%= item.description || 'No description provided' %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Created</span>
+                  <span class="detail-value"><%= new Date(item.created_at).toLocaleString('id-ID') %></span>
+                </div>
+              </div>
+
+              <% if (seller) { %>
+                <hr class="divider">
+                <h4 class="section-subtitle"><i data-lucide="user"></i> Seller Info</h4>
+                <div class="detail-fields">
+                  <div class="detail-field">
+                    <span class="detail-label">Name</span>
+                    <span class="detail-value"><a href="/users/<%= seller.id %>" class="link"><%= seller.name %></a></span>
+                  </div>
+                  <div class="detail-field">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value"><%= seller.email %></span>
+                  </div>
+                  <div class="detail-field">
+                    <span class="detail-label">Verified</span>
+                    <span class="detail-value">
+                      <% if (seller.is_verified) { %>
+                        <span class="badge badge-success">Verified</span>
+                      <% } else { %>
+                        <span class="badge badge-warning">Pending</span>
+                      <% } %>
+                    </span>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Auctions -->
+        <% if (relatedAuctions.length > 0) { %>
+          <div class="card" style="margin-top:1.5rem;">
+            <div class="card-header">
+              <h3><i data-lucide="timer"></i> Related Auctions</h3>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Start Price</th>
+                      <th>Current Price</th>
+                      <th>Status</th>
+                      <th>End Time</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% relatedAuctions.forEach(function(a) { %>
+                      <tr>
+                        <td><span class="id-badge">#<%= a.id %></span></td>
+                        <td>Rp <%= Number(a.start_price).toLocaleString('id-ID') %></td>
+                        <td class="text-currency">Rp <%= Number(a.current_price).toLocaleString('id-ID') %></td>
+                        <td>
+                          <span class="badge badge-<%= a.status === 'active' ? 'success' : a.status === 'closed' ? 'primary' : a.status === 'cancelled' ? 'danger' : 'warning' %>">
+                            <%= a.status %>
+                          </span>
+                        </td>
+                        <td class="text-muted"><%= new Date(a.end_time).toLocaleString('id-ID') %></td>
+                        <td>
+                          <a href="/auctions/<%= a.id %>" class="btn btn-sm btn-outline">
+                            <i data-lucide="eye"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        <% } %>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

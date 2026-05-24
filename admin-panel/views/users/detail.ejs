@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <a href="/users" class="btn btn-sm btn-outline btn-back">
+              <i data-lucide="arrow-left"></i> Back
+            </a>
+            <h2><%= user.name %></h2>
+            <p class="page-subtitle">User Detail</p>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <!-- User Info Card -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="user"></i> Profile Information</h3>
+            </div>
+            <div class="card-body">
+              <div class="detail-avatar-large">
+                <i data-lucide="user"></i>
+              </div>
+
+              <div class="detail-fields">
+                <div class="detail-field">
+                  <span class="detail-label">Full Name</span>
+                  <span class="detail-value"><%= user.name %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Email</span>
+                  <span class="detail-value"><%= user.email %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Role</span>
+                  <span class="detail-value">
+                    <span class="badge badge-<%= user.role === 'admin' ? 'primary' : user.role === 'seller' ? 'info' : 'default' %>">
+                      <%= user.role %>
+                    </span>
+                  </span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Phone</span>
+                  <span class="detail-value"><%= user.phone || '—' %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Address</span>
+                  <span class="detail-value"><%= user.address || '—' %></span>
+                </div>
+                <div class="detail-field">
+                  <span class="detail-label">Joined</span>
+                  <span class="detail-value"><%= new Date(user.created_at).toLocaleString('id-ID') %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verification Card -->
+          <div class="card detail-card">
+            <div class="card-header">
+              <h3><i data-lucide="shield-check"></i> Verification Status</h3>
+            </div>
+            <div class="card-body">
+              <div class="verification-status">
+                <% if (user.is_verified) { %>
+                  <div class="verification-badge verified">
+                    <i data-lucide="check-circle"></i>
+                    <span>Verified</span>
+                  </div>
+                  <p>This user has been verified by an administrator.</p>
+                  <form action="/users/<%= user.id %>/verify" method="POST">
+                    <input type="hidden" name="is_verified" value="false">
+                    <button type="submit" class="btn btn-danger btn-sm" id="revokeVerifyBtn">
+                      <i data-lucide="x-circle"></i> Revoke Verification
+                    </button>
+                  </form>
+                <% } else { %>
+                  <div class="verification-badge unverified">
+                    <i data-lucide="clock"></i>
+                    <span>Not Verified</span>
+                  </div>
+                  <p>This user has not been verified yet.</p>
+                  <form action="/users/<%= user.id %>/verify" method="POST">
+                    <input type="hidden" name="is_verified" value="true">
+                    <button type="submit" class="btn btn-success btn-sm" id="verifyUserBtn">
+                      <i data-lucide="check-circle"></i> Verify User
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

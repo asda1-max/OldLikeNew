@@ -1,0 +1,26 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="sidebar-toggle-mobile" id="sidebarOpen" aria-label="Open sidebar">
+      <i data-lucide="menu"></i>
+    </button>
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">
+        <i data-lucide="home" style="width:14px;height:14px"></i>
+      </span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item active"><%= typeof title !== 'undefined' ? title.split(' — ')[0] : 'Dashboard' %></span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="topbar-time" id="topbar-clock">
+      <!-- Filled by JS -->
+    </div>
+    <div class="topbar-user">
+      <div class="topbar-avatar">
+        <i data-lucide="user"></i>
+      </div>
+      <span class="topbar-username"><%= currentUser ? currentUser.name : 'Admin' %></span>
+    </div>
+  </div>
+</header>

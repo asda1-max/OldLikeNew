@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <h2>User Management</h2>
+          <p class="page-subtitle"><%= totalUsers %> total users registered</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="card filter-card">
+          <form action="/users" method="GET" class="filter-form" id="userFilterForm">
+            <div class="filter-group">
+              <label for="roleFilter">Role</label>
+              <select name="role" id="roleFilter" class="form-control">
+                <option value="all" <%= roleFilter === 'all' ? 'selected' : '' %>>All Roles</option>
+                <option value="admin" <%= roleFilter === 'admin' ? 'selected' : '' %>>Admin</option>
+                <option value="seller" <%= roleFilter === 'seller' ? 'selected' : '' %>>Seller</option>
+                <option value="buyer" <%= roleFilter === 'buyer' ? 'selected' : '' %>>Buyer</option>
+              </select>
+            </div>
+            <div class="filter-group filter-search">
+              <label for="searchInput">Search</label>
+              <div class="search-wrapper">
+                <i data-lucide="search"></i>
+                <input type="text" name="search" id="searchInput" class="form-control" placeholder="Search name or email..." value="<%= search %>">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i data-lucide="filter"></i> Filter
+            </button>
+          </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+          <div class="card-body">
+            <% if (users.length === 0) { %>
+              <div class="empty-state">
+                <i data-lucide="users"></i>
+                <p>No users found</p>
+              </div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="data-table" id="usersTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Verified</th>
+                      <th>Joined</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% users.forEach(function(user) { %>
+                      <tr>
+                        <td><span class="id-badge">#<%= user.id %></span></td>
+                        <td>
+                          <div class="user-cell">
+                            <div class="user-cell-avatar">
+                              <i data-lucide="user"></i>
+                            </div>
+                            <span><%= user.name %></span>
+                          </div>
+                        </td>
+                        <td class="text-muted"><%= user.email %></td>
+                        <td>
+                          <span class="badge badge-<%= user.role === 'admin' ? 'primary' : user.role === 'seller' ? 'info' : 'default' %>">
+                            <%= user.role %>
+                          </span>
+                        </td>
+                        <td>
+                          <% if (user.is_verified) { %>
+                            <span class="badge badge-success"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Verified</span>
+                          <% } else { %>
+                            <span class="badge badge-warning"><i data-lucide="clock" style="width:12px;height:12px"></i> Pending</span>
+                          <% } %>
+                        </td>
+                        <td class="text-muted"><%= new Date(user.created_at).toLocaleDateString('id-ID') %></td>
+                        <td>
+                          <a href="/users/<%= user.id %>" class="btn btn-sm btn-outline" title="View Detail">
+                            <i data-lucide="eye"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

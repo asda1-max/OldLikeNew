@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="layout-main">
+  <div class="app-wrapper">
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+      <%- include('../partials/header') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <h2>Auction Management</h2>
+          <p class="page-subtitle">Monitor and manage all auctions</p>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="tab-nav">
+          <a href="/auctions?status=active" class="tab-link <%= statusFilter === 'active' ? 'active' : '' %>" id="tab-active">
+            <i data-lucide="zap"></i> Active
+          </a>
+          <a href="/auctions?status=closed" class="tab-link <%= statusFilter === 'closed' ? 'active' : '' %>" id="tab-closed">
+            <i data-lucide="check-circle"></i> Closed
+          </a>
+          <a href="/auctions?status=cancelled" class="tab-link <%= statusFilter === 'cancelled' ? 'active' : '' %>" id="tab-cancelled">
+            <i data-lucide="x-circle"></i> Cancelled
+          </a>
+          <a href="/auctions?status=draft" class="tab-link <%= statusFilter === 'draft' ? 'active' : '' %>" id="tab-draft">
+            <i data-lucide="file-text"></i> Draft
+          </a>
+        </div>
+
+        <!-- Auctions Table -->
+        <div class="card">
+          <div class="card-body">
+            <% if (auctions.length === 0) { %>
+              <div class="empty-state">
+                <i data-lucide="timer"></i>
+                <p>No <%= statusFilter %> auctions found</p>
+              </div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="data-table" id="auctionsTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Item</th>
+                      <th>Seller</th>
+                      <th>Start Price</th>
+                      <th>Current Price</th>
+                      <th>Buyout</th>
+                      <th>End Time</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% auctions.forEach(function(auction) { %>
+                      <tr>
+                        <td><span class="id-badge">#<%= auction.id %></span></td>
+                        <td>
+                          <div class="item-cell">
+                            <% if (auction.item && auction.item.image_urls && auction.item.image_urls.length > 0) { %>
+                              <img src="<%= auction.item.image_urls[0].startsWith('http') ? auction.item.image_urls[0] : API_BASE_URL + '/' + auction.item.image_urls[0] %>" alt="" class="item-cell-thumb">
+                            <% } %>
+                            <span><%= auction.item ? auction.item.title : 'N/A' %></span>
+                          </div>
+                        </td>
+                        <td>
+                          <a href="/users/<%= auction.seller ? auction.seller.id : '' %>" class="link">
+                            <%= auction.seller ? auction.seller.name : 'N/A' %>
+                          </a>
+                        </td>
+                        <td>Rp <%= Number(auction.start_price).toLocaleString('id-ID') %></td>
+                        <td class="text-currency">Rp <%= Number(auction.current_price).toLocaleString('id-ID') %></td>
+                        <td>
+                          <% if (auction.buyout_price) { %>
+                            Rp <%= Number(auction.buyout_price).toLocaleString('id-ID') %>
+                          <% } else { %>
+                            <span class="text-muted">—</span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <% if (statusFilter === 'active') { %>
+                            <span class="countdown" data-end="<%= auction.end_time %>">
+                              <%= new Date(auction.end_time).toLocaleString('id-ID') %>
+                            </span>
+                          <% } else { %>
+                            <span class="text-muted"><%= new Date(auction.end_time).toLocaleString('id-ID') %></span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <span class="badge badge-<%= auction.status === 'active' ? 'success' : auction.status === 'closed' ? 'primary' : auction.status === 'cancelled' ? 'danger' : 'warning' %>">
+                            <%= auction.status %>
+                          </span>
+                        </td>
+                        <td>
+                          <a href="/auctions/<%= auction.id %>" class="btn btn-sm btn-outline" title="View Detail">
+                            <i data-lucide="eye"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

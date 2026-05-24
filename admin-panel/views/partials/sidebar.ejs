@@ -1,0 +1,64 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <i data-lucide="gavel"></i>
+    </div>
+    <div class="brand-text">
+      <h1>LelangKu</h1>
+      <span>Admin Panel</span>
+    </div>
+    <button class="sidebar-toggle" id="sidebarClose" aria-label="Close sidebar">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <span class="nav-section-title">Main</span>
+      <a href="/dashboard" class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>" id="nav-dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-section-title">Management</span>
+      <a href="/users" class="nav-link <%= currentPath === '/users' ? 'active' : '' %>" id="nav-users">
+        <i data-lucide="users"></i>
+        <span>Users</span>
+      </a>
+      <a href="/items" class="nav-link <%= currentPath === '/items' ? 'active' : '' %>" id="nav-items">
+        <i data-lucide="package"></i>
+        <span>Items</span>
+      </a>
+      <a href="/auctions" class="nav-link <%= currentPath === '/auctions' ? 'active' : '' %>" id="nav-auctions">
+        <i data-lucide="timer"></i>
+        <span>Auctions</span>
+      </a>
+      <a href="/transactions" class="nav-link <%= currentPath === '/transactions' ? 'active' : '' %>" id="nav-transactions">
+        <i data-lucide="credit-card"></i>
+        <span>Transactions</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-section-title">Account</span>
+      <a href="/auth/logout" class="nav-link nav-link-danger" id="nav-logout">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">
+        <i data-lucide="shield-check"></i>
+      </div>
+      <div class="user-info">
+        <span class="user-name"><%= currentUser ? currentUser.name : 'Admin' %></span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </div>
+</aside>
