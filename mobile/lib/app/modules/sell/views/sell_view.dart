@@ -54,28 +54,6 @@ class SellView extends GetView<SellController> {
                   maxLines: 4,
                 ),
               ]),
-              const SizedBox(height: 24),
-              _buildSectionTitle('Detail Pelelangan', Icons.gavel_outlined),
-              const SizedBox(height: 12),
-              _buildCard([
-                _buildTextField(
-                  controller: controller.startPriceController,
-                  label: 'Harga Awal (Rp)',
-                  hint: 'Contoh: 500000',
-                  icon: Icons.monetization_on_outlined,
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: controller.buyoutPriceController,
-                  label: 'Harga Buyout (Rp) - Opsional',
-                  hint: 'Langsung terjual jika bid mencapai harga ini',
-                  icon: Icons.bolt_outlined,
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 16),
-                _buildDurationSelector(),
-              ]),
               const SizedBox(height: 32),
               _buildSubmitButton(),
               const SizedBox(height: 40),
@@ -326,52 +304,7 @@ class SellView extends GetView<SellController> {
     );
   }
 
-  Widget _buildDurationSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Durasi Pelelangan',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF4A2C1A),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Obx(() {
-          return Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F5F0),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE8DDD3), width: 1.2),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: controller.durationHours.value,
-                isExpanded: true,
-                dropdownColor: const Color(0xFFF9F5F0),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFB8865A)),
-                onChanged: (int? newValue) {
-                  if (newValue != null) controller.durationHours.value = newValue;
-                },
-                items: controller.durations.map<DropdownMenuItem<int>>((duration) {
-                  return DropdownMenuItem<int>(
-                    value: duration['hours'] as int,
-                    child: Text(
-                      duration['label'] as String,
-                      style: const TextStyle(color: Color(0xFF2C1810), fontSize: 14),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
+
 
   Widget _buildSubmitButton() {
     return Obx(() {
@@ -415,7 +348,7 @@ class SellView extends GetView<SellController> {
                     Icon(Icons.cloud_upload_outlined, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
-                      'Unggah Barang & Mulai Lelang',
+                      'Unggah Barang',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

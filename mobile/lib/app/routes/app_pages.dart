@@ -16,6 +16,8 @@ import '../modules/sell/bindings/sell_binding.dart';
 import '../modules/sell/views/sell_view.dart';
 import '../modules/transactions/bindings/transactions_binding.dart';
 import '../modules/transactions/views/transactions_view.dart';
+import '../modules/my_items/bindings/my_items_binding.dart';
+import '../modules/my_items/views/my_items_view.dart';
 
 part 'app_routes.dart';
 
@@ -69,6 +71,11 @@ class AppPages {
       name: _Paths.AUCTION_DETAIL,
       page: () => const AuctionDetailView(),
       binding: AuctionDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.MY_ITEMS,
+      page: () => const MyItemsView(),
+      binding: MyItemsBinding(),
     ),
   ];
 }

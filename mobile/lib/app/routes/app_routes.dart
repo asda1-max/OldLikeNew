@@ -12,10 +12,12 @@ abstract class Routes {
   static const PROFILE = _Paths.PROFILE;
   static const TRANSACTIONS = _Paths.TRANSACTIONS;
   static const AUCTION_DETAIL = _Paths.AUCTION_DETAIL;
+  static const MY_ITEMS = _Paths.MY_ITEMS;
 }
 
 abstract class _Paths {
   _Paths._();
+
   static const HOME = '/home';
   static const AUTH = '/auth';
   static const AUTHREGISTER = '/authregister';
@@ -26,4 +28,5 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   static const TRANSACTIONS = '/transactions';
   static const AUCTION_DETAIL = '/auction-detail';
+  static const MY_ITEMS = '/my-items';
 }

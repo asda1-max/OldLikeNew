@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
+import '../../../routes/app_pages.dart';
 import '../../../shared/widgets/custom_bottom_navbar.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -257,7 +258,12 @@ class ProfileView extends GetView<ProfileController> {
       child: Column(
         children: [
           if (isSeller) ...[
-            _buildActivityRow('Kelola Barang Saya', 'Lihat daftar dagangan Anda', Icons.inventory_2_outlined),
+            _buildActivityRow(
+              'Kelola Barang Saya', 
+              'Lihat daftar dagangan Anda', 
+              Icons.inventory_2_outlined,
+              onTap: () => Get.toNamed(Routes.MY_ITEMS),
+            ),
             const Divider(color: Color(0xFFE8DDD3), height: 1),
             _buildActivityRow('Lelang Aktif Saya', 'Pantau jalannya lelang', Icons.gavel_outlined),
           ] else ...[
@@ -270,9 +276,9 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildActivityRow(String title, String subtitle, IconData icon) {
+  Widget _buildActivityRow(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
     return ListTile(
-      onTap: () {
+      onTap: onTap ?? () {
         Get.snackbar(
           title,
           'Detail aktivitas ini akan segera tersedia.',
