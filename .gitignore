@@ -1,7 +1,7 @@
 /.venv
 # Environment and Credentials
 .env
-firebase-credentials.json
+/OldLikeNew - Backend/.venv/firebase-credentials.json
 *.json
 
 # SQLite
