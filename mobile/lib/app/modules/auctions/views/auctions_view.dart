@@ -63,38 +63,54 @@ class AuctionsView extends GetView<AuctionsController> {
               }
 
               if (controller.auctions.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8DDD3),
-                          borderRadius: BorderRadius.circular(20),
+                return RefreshIndicator(
+                  onRefresh: () => controller.fetchAuctions(forceRefresh: true),
+                  color: const Color(0xFFB8865A),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE8DDD3),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.gavel_rounded,
+                                    size: 40,
+                                    color: Color(0xFFB8865A),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Tidak Ada Lelang',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2C1810),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Barang lelang yang dicari tidak ditemukan.',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.gavel_rounded,
-                          size: 40,
-                          color: Color(0xFFB8865A),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Tidak Ada Lelang',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C1810),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Barang lelang yang dicari tidak ditemukan.',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 );
               }

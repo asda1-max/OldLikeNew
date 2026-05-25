@@ -40,8 +40,9 @@ class AuthLoginController extends GetxController {
       final authService = Get.find<AuthService>();
       final profile = await service.getUserProfile(token);
       final role = profile['role'] ?? 'buyer';
+      final userId = profile['id'];
 
-      authService.setSession(token, role);
+      authService.setSession(token, role, userId: userId);
 
       Get.snackbar('Success', 'Login successful as $role');
 
