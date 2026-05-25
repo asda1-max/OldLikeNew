@@ -19,18 +19,26 @@ def create_auction(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("seller")),
 ):
+    print(f"[Create Auction] Incoming request for item_id: {payload.item_id} by user_id: {current_user.id}")
     item = db.query(Item).filter(Item.id == payload.item_id).first()
     if not item:
+        print(f"[Create Auction] Failed: Item {payload.item_id} not found.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    
+    print(f"[Create Auction] Item found. Verifying ownership...")
     if item.seller_id != current_user.id and current_user.role != "admin":
+        print(f"[Create Auction] Failed: User {current_user.id} does not own item {payload.item_id}.")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
     start_time = payload.start_time or datetime.utcnow()
     if payload.end_time <= start_time:
+        print("[Create Auction] Failed: Invalid end_time. Must be after start_time.")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid end_time")
     if payload.buyout_price is not None and payload.buyout_price < payload.start_price:
+        print("[Create Auction] Failed: Buyout price cannot be lower than start price.")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid buyout_price")
 
+    print(f"[Create Auction] Creating auction in DB (start_price: {payload.start_price}, end_time: {payload.end_time})")
     auction = Auction(
         item_id=item.id,
         seller_id=current_user.id,
@@ -45,9 +53,11 @@ def create_auction(
     db.commit()
     db.refresh(auction)
     
+    print(f"[Create Auction] Auction saved in DB with ID: {auction.id}. Syncing to Firebase...")
     # Sync status awal ke Firebase
     sync_auction_to_firebase(auction)
     
+    print(f"[Create Auction] Process complete for auction ID: {auction.id}")
     return auction
 
 
