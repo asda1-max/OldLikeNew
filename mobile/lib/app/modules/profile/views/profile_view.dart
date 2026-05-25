@@ -70,7 +70,7 @@ class ProfileView extends GetView<ProfileController> {
       }),
       bottomNavigationBar: Obx(() {
         final currentRole = controller.role.value;
-        return CustomBottomNavBar(currentIndex: currentRole == 'seller' ? 4 : 3);
+        return CustomBottomNavBar(currentIndex: currentRole == 'seller' ? 5 : 4);
       }),
     );
   }

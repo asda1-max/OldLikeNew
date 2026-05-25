@@ -84,7 +84,7 @@ class TransactionsView extends GetView<TransactionsController> {
       }),
       bottomNavigationBar: Obx(() {
         final currentRole = controller.userRole.value;
-        return CustomBottomNavBar(currentIndex: currentRole == 'seller' ? 3 : 2);
+        return CustomBottomNavBar(currentIndex: currentRole == 'seller' ? 4 : 3);
       }),
     );
   }

@@ -1,14 +1,17 @@
 import asyncio
+import logging
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from app.database import init_db, SessionLocal
-from app.routers import auth, users, items, auctions, bids, transactions
+from app.routers import auth, users, items, auctions, bids, transactions, chat
 from app.services.auction_service import close_expired_auctions
 
 load_dotenv()
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
 CORS_ALLOW_ORIGINS = os.getenv("CORS_ALLOW_ORIGINS", "*")
@@ -29,6 +32,7 @@ app.include_router(items.router)
 app.include_router(auctions.router)
 app.include_router(bids.router)
 app.include_router(transactions.router)
+app.include_router(chat.router)
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")

@@ -25,6 +25,7 @@ class CustomBottomNavBar extends StatelessWidget {
           BottomNavItemData(icon: Icons.home_rounded, label: 'Home', route: Routes.HOME),
           BottomNavItemData(icon: Icons.gavel_outlined, label: 'Lelang', route: Routes.AUCTIONS),
           BottomNavItemData(icon: Icons.add_circle_outline, label: 'Jual', route: Routes.SELL),
+          BottomNavItemData(icon: Icons.chat_bubble_outline, label: 'Chat', route: Routes.CHAT),
           BottomNavItemData(icon: Icons.receipt_long_outlined, label: 'Transaksi', route: Routes.TRANSACTIONS),
           BottomNavItemData(icon: Icons.person_outline, label: 'Profil', route: Routes.PROFILE),
         ];
@@ -33,6 +34,7 @@ class CustomBottomNavBar extends StatelessWidget {
         items = [
           BottomNavItemData(icon: Icons.home_rounded, label: 'Home', route: Routes.HOME),
           BottomNavItemData(icon: Icons.gavel_outlined, label: 'Lelang', route: Routes.AUCTIONS),
+          BottomNavItemData(icon: Icons.chat_bubble_outline, label: 'Chat', route: Routes.CHAT),
           BottomNavItemData(icon: Icons.receipt_long_outlined, label: 'Transaksi', route: Routes.TRANSACTIONS),
           BottomNavItemData(icon: Icons.person_outline, label: 'Profil', route: Routes.PROFILE),
         ];

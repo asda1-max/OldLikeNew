@@ -13,6 +13,7 @@ abstract class Routes {
   static const TRANSACTIONS = _Paths.TRANSACTIONS;
   static const AUCTION_DETAIL = _Paths.AUCTION_DETAIL;
   static const MY_ITEMS = _Paths.MY_ITEMS;
+  static const CHAT = _Paths.CHAT;
 }
 
 abstract class _Paths {
@@ -29,4 +30,5 @@ abstract class _Paths {
   static const TRANSACTIONS = '/transactions';
   static const AUCTION_DETAIL = '/auction-detail';
   static const MY_ITEMS = '/my-items';
+  static const CHAT = '/chat';
 }
