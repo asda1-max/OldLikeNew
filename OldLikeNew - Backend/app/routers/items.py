@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 from app.models.item import Item
 from app.schemas.item import ItemOut
-from app.utils.dependencies import get_db, require_roles
+from app.utils.dependencies import get_current_user, get_db, require_roles
 from app.models.user import User
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
@@ -40,6 +40,7 @@ def create_item(
         category=category,
         condition=condition,
         image_urls=image_urls,
+        is_verified=False,
     )
     db.add(item)
     db.commit()
@@ -57,4 +58,24 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    return item
+
+
+@router.put("/{item_id}/verify", response_model=ItemOut)
+def verify_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+    item.is_verified = True
+    db.add(item)
+    db.commit()
+    db.refresh(item)
     return item

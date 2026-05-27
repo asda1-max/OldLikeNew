@@ -84,8 +84,7 @@
                       <i data-lucide="calendar" style="width:12px;height:12px"></i>
                       <%= new Date(item.created_at).toLocaleDateString('id-ID') %>
                     </span>
-                    <% if (item.auctions && item.auctions.length > 0) { %>
-                      <span class="badge badge-primary"><%= item.auctions.length %> auction(s)</span>
+                    <% if (item.is_verified) { %>
                       <span class="badge badge-success">Verified</span>
                     <% } else { %>
                       <span class="badge badge-warning">Pending Verification</span>

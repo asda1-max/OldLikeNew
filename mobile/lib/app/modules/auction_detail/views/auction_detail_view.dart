@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/auction_detail_controller.dart';
 
 class AuctionDetailView extends GetView<AuctionDetailController> {
@@ -43,6 +44,7 @@ class AuctionDetailView extends GetView<AuctionDetailController> {
         }
 
         final item = data['item'] ?? {};
+        final seller = data['seller'] ?? {};
         final title = item['title'] ?? 'Barang Lelang';
         final description = item['description'] ?? 'Tidak ada deskripsi.';
         final category = item['category'] ?? 'Lainnya';
@@ -71,6 +73,14 @@ class AuctionDetailView extends GetView<AuctionDetailController> {
                   _buildPriceSection(startPrice, currentPrice, buyoutPrice),
                   const SizedBox(height: 20),
                   _buildDescriptionCard(description),
+                  const SizedBox(height: 20),
+                  if (controller.userRole.value == 'buyer')
+                    _buildSellerCard(
+                      sellerId: seller['id'],
+                      sellerName: seller['name'] ?? 'Penjual',
+                      itemId: item['id'],
+                      itemTitle: title,
+                    ),
                   const SizedBox(height: 24),
                   _buildBidsHistorySection(),
                 ],
@@ -373,6 +383,97 @@ class AuctionDetailView extends GetView<AuctionDetailController> {
           Text(
             description,
             style: const TextStyle(fontSize: 13.5, color: Color(0xFF4A2C1A), height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSellerCard({
+    required dynamic sellerId,
+    required String sellerName,
+    required dynamic itemId,
+    required String itemTitle,
+  }) {
+    final int? safeSellerId = sellerId is int
+        ? sellerId
+        : sellerId is num
+            ? sellerId.toInt()
+            : null;
+    final int? safeItemId = itemId is int
+        ? itemId
+        : itemId is num
+            ? itemId.toInt()
+            : null;
+    final canChat = safeSellerId != null && safeItemId != null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE8DDD3).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: const Color(0xFFF9F5F0),
+            child: Text(
+              sellerName.isNotEmpty ? sellerName[0].toUpperCase() : 'S',
+              style: const TextStyle(
+                color: Color(0xFFB8865A),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Penjual',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  sellerName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2C1810),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            onPressed: canChat
+                ? () {
+                    Get.toNamed(
+                      Routes.CHAT,
+                      arguments: {
+                        'seller_id': safeSellerId,
+                        'seller_name': sellerName,
+                        'item_id': safeItemId,
+                        'item_title': itemTitle,
+                      },
+                    );
+                  }
+                : null,
+            icon: const Icon(Icons.chat_bubble_outline, size: 16, color: Colors.white),
+            label: const Text(
+              'Chat Penjual',
+              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB8865A),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
           ),
         ],
       ),

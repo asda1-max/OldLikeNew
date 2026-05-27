@@ -24,6 +24,9 @@ def create_auction(
     if not item:
         print(f"[Create Auction] Failed: Item {payload.item_id} not found.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+    if not item.is_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item not verified")
     
     print(f"[Create Auction] Item found. Verifying ownership...")
     if item.seller_id != current_user.id and current_user.role != "admin":
@@ -41,7 +44,7 @@ def create_auction(
     print(f"[Create Auction] Creating auction in DB (start_price: {payload.start_price}, end_time: {payload.end_time})")
     auction = Auction(
         item_id=item.id,
-        seller_id=current_user.id,
+        seller_id=item.seller_id,
         start_price=payload.start_price,
         current_price=payload.start_price,
         buyout_price=payload.buyout_price,

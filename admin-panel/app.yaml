@@ -1,0 +1,8 @@
+runtime: nodejs22
+service: admin-panel
+
+env_variables:
+  API_BASE_URL: "https://lelangku-backend-487072029768.asia-southeast2.run.app"
+  SESSION_SECRET: "your-secret-key-here"
+  NODE_ENV: "production"
+  PORT: "8080"

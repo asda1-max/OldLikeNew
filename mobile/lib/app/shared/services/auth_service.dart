@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/security_helper.dart';
@@ -35,11 +34,7 @@ class AuthService extends GetxService {
       }
       print("Auth session loaded: isLogged=${isLoggedIn}, role=${userRole}");
       
-      // If token exists, we could also sync FCM token here if we saved userId
-      final userId = prefs.getInt('auth_user_id');
-      if (userId != null && token.value != null) {
-        _syncFcmToken(userId, token.value!);
-      }
+      // No FCM sync required (backend-only for chat)
     } catch (e) {
       print("Error loading auth session: $e");
     }
@@ -55,43 +50,9 @@ class AuthService extends GetxService {
       await prefs.setString('auth_role', Obfuscator.encrypt(roleVal));
       if (userId != null) {
         await prefs.setInt('auth_user_id', userId);
-        _syncFcmToken(userId, tokenVal);
       }
     } catch (e) {
       print("Error saving auth session: $e");
-    }
-  }
-
-  Future<void> _syncFcmToken(int userId, String authToken) async {
-    try {
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      if (fcmToken != null) {
-        final baseUrl = dotenv.env['BACKEND_BASE_URL'] ?? 'http://127.0.0.1:8000';
-        final url = Uri.parse('$baseUrl/users/$userId/fcm-token');
-        await http.put(
-          url,
-          headers: {
-            'Authorization': 'Bearer $authToken',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({'fcm_token': fcmToken}),
-        );
-      }
-      
-      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-        final baseUrl = dotenv.env['BACKEND_BASE_URL'] ?? 'http://127.0.0.1:8000';
-        final url = Uri.parse('$baseUrl/users/$userId/fcm-token');
-        await http.put(
-          url,
-          headers: {
-            'Authorization': 'Bearer $authToken',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({'fcm_token': newToken}),
-        );
-      });
-    } catch (e) {
-      print("Error syncing FCM token: $e");
     }
   }
 

@@ -80,7 +80,9 @@ class MyItemsView extends GetView<MyItemsController> {
   }
 
   Widget _buildItemCard(dynamic item) {
-    final bool isVerified = controller.verifiedItemIds.contains(item['id']);
+    final int itemId = item['id'] as int;
+    final bool isVerified = controller.verifiedItemIds.contains(itemId);
+    final bool hasAuction = controller.auctionedItemIds.contains(itemId);
     final imageUrls = item['image_urls'] as List<dynamic>? ?? [];
     final imageUrl = imageUrls.isNotEmpty ? imageUrls.first.toString() : '';
     
@@ -170,13 +172,126 @@ class MyItemsView extends GetView<MyItemsController> {
                               color: isVerified ? Colors.green : Colors.orange,
                             ),
                           ),
+                          if (isVerified && !hasAuction) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF3E0),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                'Siap Lelang',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFB8865A),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
+                      if (isVerified && !hasAuction) ...[
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _showCreateAuctionDialog(itemId),
+                            icon: const Icon(Icons.gavel_rounded, size: 16, color: Colors.white),
+                            label: const Text(
+                              'Buat Lelang',
+                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB8865A),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateAuctionDialog(int itemId) {
+    final startPriceController = TextEditingController();
+    final buyoutPriceController = TextEditingController();
+    final durationOptions = [12, 24, 48, 72];
+    final selectedDuration = 24.obs;
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Buat Lelang'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: startPriceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Start Price (Rp)'),
+            ),
+            TextField(
+              controller: buyoutPriceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Buyout Price (Opsional)'),
+            ),
+            const SizedBox(height: 8),
+            Obx(() {
+              return DropdownButtonFormField<int>(
+                value: selectedDuration.value,
+                decoration: const InputDecoration(labelText: 'Durasi (Jam)'),
+                items: durationOptions
+                    .map((value) => DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value Jam'),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) selectedDuration.value = value;
+                },
+              );
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final startPrice = double.tryParse(startPriceController.text.trim());
+              if (startPrice == null || startPrice <= 0) {
+                Get.snackbar('Error', 'Start price tidak valid');
+                return;
+              }
+
+              final buyoutText = buyoutPriceController.text.trim();
+              final buyoutPrice = buyoutText.isEmpty ? null : double.tryParse(buyoutText);
+
+              if (buyoutText.isNotEmpty && (buyoutPrice == null || buyoutPrice <= 0)) {
+                Get.snackbar('Error', 'Buyout price tidak valid');
+                return;
+              }
+
+              controller.createAuction(
+                itemId: itemId,
+                startPrice: startPrice,
+                buyoutPrice: buyoutPrice,
+                durationHours: selectedDuration.value,
+              );
+              Get.back();
+            },
+            child: const Text('Buat'),
           ),
         ],
       ),

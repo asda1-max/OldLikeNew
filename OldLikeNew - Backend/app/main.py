@@ -49,13 +49,15 @@ async def auction_auto_close_loop(stop_event: asyncio.Event):
 
 
 @app.on_event("startup")
-def on_startup():
+async def on_startup():
     init_db()
     app.state.stop_event = asyncio.Event()
     app.state.bg_task = asyncio.create_task(auction_auto_close_loop(app.state.stop_event))
 
 
 @app.on_event("shutdown")
-def on_shutdown():
+async def on_shutdown():
     if hasattr(app.state, "stop_event"):
         app.state.stop_event.set()
+    if hasattr(app.state, "bg_task"):
+        app.state.bg_task.cancel()

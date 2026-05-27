@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/chat_controller.dart';
@@ -14,24 +13,40 @@ class ChatView extends GetView<ChatController> {
       backgroundColor: const Color(0xFFF9F5F0),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C1810),
-        title: const Text(
-          'Chat Global',
-          style: TextStyle(
-            color: Color(0xFFD4A574),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Obx(() {
+          final title = controller.chatId.value == null
+              ? 'Chat'
+              : 'Chat ${_resolvePeerName()}';
+          return Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFD4A574),
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        }),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Color(0xFFD4A574)),
         elevation: 0,
+        leading: Obx(() {
+          if (controller.chatId.value == null) {
+            return const SizedBox.shrink();
+          }
+          return IconButton(
+            onPressed: controller.closeChat,
+            icon: const Icon(Icons.arrow_back, color: Color(0xFFD4A574)),
+          );
+        }),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: controller.messagesStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+      body: Obx(() {
+        if (controller.chatId.value == null) {
+          return _buildChatList();
+        }
+        return Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoadingMessages.value && controller.messages.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB8865A)),
@@ -39,17 +54,7 @@ class ChatView extends GetView<ChatController> {
                   );
                 }
 
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text(
-                      'Gagal memuat pesan',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  );
-                }
-
-                final docs = snapshot.data?.docs ?? [];
-                if (docs.isEmpty) {
+                if (controller.messages.isEmpty) {
                   return const Center(
                     child: Text(
                       'Belum ada pesan',
@@ -61,9 +66,9 @@ class ChatView extends GetView<ChatController> {
                 return ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  itemCount: docs.length,
+                  itemCount: controller.messages.length,
                   itemBuilder: (context, index) {
-                    final data = docs[index].data();
+                    final data = controller.messages[index];
                     final senderId = data['sender_id'];
                     final senderName = data['sender_name'] ?? 'Pengguna';
                     final text = data['text'] ?? '';
@@ -127,18 +132,120 @@ class ChatView extends GetView<ChatController> {
                     );
                   },
                 );
-              },
+              }),
             ),
-          ),
-          _buildComposer(),
-        ],
-      ),
+            _buildComposer(),
+          ],
+        );
+      }),
       bottomNavigationBar: Obx(() {
         final authService = Get.find<AuthService>();
         final currentRole = authService.userRole;
         return CustomBottomNavBar(currentIndex: currentRole == 'seller' ? 3 : 2);
       }),
     );
+  }
+
+  Widget _buildChatList() {
+    return Obx(() {
+      if (controller.isLoadingThreads.value && controller.threads.isEmpty) {
+        return const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB8865A)),
+          ),
+        );
+      }
+
+      if (controller.threads.isEmpty) {
+        return const Center(
+          child: Text(
+            'Belum ada percakapan',
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        itemCount: controller.threads.length,
+        itemBuilder: (context, index) {
+          final data = controller.threads[index];
+          final lastMessage = (data['last_message'] ?? '').toString();
+          final lastTime = _formatTime(data);
+          final buyerId = data['buyer_id'] as int?;
+          final sellerId = data['seller_id'] as int?;
+          final buyerName = (data['buyer_name'] ?? 'Pembeli').toString();
+          final sellerName = (data['seller_name'] ?? 'Penjual').toString();
+          final currentUserId = controller.userId.value;
+
+          String peerLabel = sellerName;
+          if (currentUserId != null && currentUserId == sellerId) {
+            peerLabel = buyerName;
+          }
+
+          return GestureDetector(
+            onTap: () => controller.openChatFromThread(data),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: const Color(0xFFF9F5F0),
+                    child: Text(
+                      peerLabel.isNotEmpty ? peerLabel[0].toUpperCase() : 'C',
+                      style: const TextStyle(
+                        color: Color(0xFFB8865A),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          peerLabel,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C1810),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          lastMessage.isEmpty ? 'Mulai chat...' : lastMessage,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF4A2C1A)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    lastTime,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 
   Widget _buildComposer() {
@@ -211,14 +318,27 @@ class ChatView extends GetView<ChatController> {
     );
   }
 
+  String _resolvePeerName() {
+    final currentUserId = controller.userId.value;
+    final currentBuyerId = controller.buyerId.value;
+    final currentSellerId = controller.sellerId.value;
+
+    if (currentUserId != null && currentUserId == currentSellerId) {
+      return controller.buyerName.value;
+    }
+    if (currentUserId != null && currentUserId == currentBuyerId) {
+      return controller.sellerName.value;
+    }
+
+    return controller.sellerName.value;
+  }
+
   String _formatTime(Map<String, dynamic> data) {
-    final createdAt = data['created_at'];
+    final createdAt = data['last_message_at'] ?? data['created_at'];
     DateTime? time;
 
-    if (createdAt is Timestamp) {
-      time = createdAt.toDate();
-    } else if (data['created_at_local'] is String) {
-      time = DateTime.tryParse(data['created_at_local'] as String);
+    if (createdAt is String) {
+      time = DateTime.tryParse(createdAt);
     }
 
     if (time == null) return '';

@@ -163,28 +163,12 @@
               <h3><i data-lucide="shield-check"></i> Verify Item</h3>
             </div>
             <div class="card-body">
-              <p class="text-muted" style="margin-bottom: 1rem;">This item has not been verified yet. Create an auction to verify and list it for bidding.</p>
-              <form action="/items/<%= item.id %>/verify" method="POST" class="auth-form" style="max-width: 500px;">
-                <div class="form-group">
-                  <label for="start_price">Start Price (Rp)</label>
-                  <input type="number" name="start_price" id="start_price" class="form-control" required min="1">
-                </div>
-                <div class="form-group">
-                  <label for="buyout_price">Buyout Price (Rp) - Optional</label>
-                  <input type="number" name="buyout_price" id="buyout_price" class="form-control">
-                </div>
-                <div class="form-group">
-                  <label for="duration_hours">Duration (Hours)</label>
-                  <select name="duration_hours" id="duration_hours" class="form-control" required>
-                    <option value="1">1 Hour</option>
-                    <option value="12">12 Hours</option>
-                    <option value="24" selected>24 Hours (1 Day)</option>
-                    <option value="48">48 Hours (2 Days)</option>
-                    <option value="72">72 Hours (3 Days)</option>
-                  </select>
-                </div>
+              <p class="text-muted" style="margin-bottom: 1rem;">
+                Admin memverifikasi barang. Setelah disetujui, penjual bisa membuat lelang dan menentukan harga.
+              </p>
+              <form action="/items/<%= item.id %>/verify" method="POST" style="display:inline" onsubmit="return confirm('Verify this item?')">
                 <button type="submit" class="btn btn-primary">
-                  <i data-lucide="check-circle"></i> Verify & Create Auction
+                  <i data-lucide="check-circle"></i> Verify Item
                 </button>
               </form>
             </div>

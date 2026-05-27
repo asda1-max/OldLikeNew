@@ -11,8 +11,8 @@ router.get('/', async (req, res, next) => {
   try {
     const api = createApiClient(req.session.token);
 
-    // Fetch items from all auctions (active + closed + draft + cancelled)
-    const statuses = ['active', 'closed', 'cancelled', 'draft'];
+    // Fetch items from all auctions (active + closed + cancelled)
+    const statuses = ['active', 'closed', 'cancelled'];
     const results = await Promise.allSettled(
       statuses.map((s) => api.get(`/auctions/?status=${s}`))
     );
@@ -110,7 +110,7 @@ router.get('/:id', async (req, res, next) => {
     const { data: item } = await api.get(`/items/${req.params.id}`);
 
     // Fetch auctions for this item
-    const statuses = ['active', 'closed', 'cancelled', 'draft'];
+    const statuses = ['active', 'closed', 'cancelled'];
     const results = await Promise.allSettled(
       statuses.map((s) => api.get(`/auctions/?status=${s}`))
     );
@@ -147,23 +147,12 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// POST /items/:id/verify — Verify item by creating an auction
-router.post('/:id/verify', async (req, res, next) => {
+// POST /items/:id/verify — Verify item (admin)
+router.post('/:id/verify', async (req, res) => {
   try {
     const api = createApiClient(req.session.token);
-
-    // Create auction payload
-    const payload = {
-      item_id: parseInt(req.params.id),
-      start_price: parseFloat(req.body.start_price),
-      buyout_price: req.body.buyout_price ? parseFloat(req.body.buyout_price) : null,
-      start_time: new Date().toISOString(),
-      end_time: new Date(Date.now() + parseInt(req.body.duration_hours) * 3600000).toISOString()
-    };
-
-    await api.post('/auctions/', payload);
-
-    res.redirect(`/items/${req.params.id}?success=Item verified and auctioned successfully`);
+    await api.put(`/items/${req.params.id}/verify`);
+    res.redirect(`/items/${req.params.id}?success=Item verified`);
   } catch (err) {
     const message = err.response?.data?.detail || 'Failed to verify item';
     res.redirect(`/items/${req.params.id}?error=${encodeURIComponent(message)}`);
