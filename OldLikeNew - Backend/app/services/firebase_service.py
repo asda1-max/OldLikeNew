@@ -146,8 +146,7 @@ def list_direct_chat_threads(user_id: int, limit: int = 50) -> list[dict]:
         query = (
             db.collection("chats")
             .where("participants", "array_contains", user_id)
-            .order_by("last_message_at", direction=firestore.Query.DESCENDING)
-            .limit(limit)
+            .limit(limit * 2) # increased limit to allow sorting top recent ones locally
         )
         results: list[dict] = []
         for doc in query.stream():
@@ -163,6 +162,13 @@ def list_direct_chat_threads(user_id: int, limit: int = 50) -> list[dict]:
                     "last_message_at": _ts_to_str(data.get("last_message_at")),
                 }
             )
+
+        # Sort the threads locally by last_message_at descending
+        results.sort(
+            key=lambda x: x["last_message_at"] if x["last_message_at"] else "",
+            reverse=True
+        )
+        results = results[:limit]
 
         logger.info("[Chat] Loaded %s threads", len(results))
         return results

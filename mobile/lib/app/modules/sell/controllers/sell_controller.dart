@@ -37,8 +37,36 @@ class SellController extends GetxController {
   }
 
   Future<void> pickImage() async {
+    Get.bottomSheet(
+      Container(
+        color: Colors.white,
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeri'),
+              onTap: () {
+                Get.back();
+                _getImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Kamera'),
+              onTap: () {
+                Get.back();
+                _getImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
         imageFile.value = image;
       }
@@ -82,9 +110,11 @@ class SellController extends GetxController {
       itemRequest.fields['category'] = selectedCategory.value;
       itemRequest.fields['condition'] = selectedCondition.value;
 
-      itemRequest.files.add(await http.MultipartFile.fromPath(
+      var imageBytes = await imageFile.value!.readAsBytes();
+      itemRequest.files.add(http.MultipartFile.fromBytes(
         'images',
-        imageFile.value!.path,
+        imageBytes,
+        filename: imageFile.value!.name,
       ));
 
       final itemStreamedResponse = await itemRequest.send();

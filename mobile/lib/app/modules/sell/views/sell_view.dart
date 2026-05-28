@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/sell_controller.dart';
@@ -96,10 +97,15 @@ class SellView extends GetView<SellController> {
               child: image != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(11),
-                      child: Image.file(
-                        File(image.path),
-                        fit: BoxFit.cover,
-                      ),
+                      child: kIsWeb
+                          ? Image.network(
+                              image.path,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.file(
+                              File(image.path),
+                              fit: BoxFit.cover,
+                            ),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -111,7 +117,7 @@ class SellView extends GetView<SellController> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Ambil Foto dari Kamera',
+                          'Pilih Foto',
                           style: TextStyle(
                             color: Color(0xFFB8865A),
                             fontSize: 13,
